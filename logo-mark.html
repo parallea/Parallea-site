@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parallea Mark</title>
+    <style>
+      @import url("https://api.fontshare.com/v2/css?f[]=array@400,500,700&display=swap");
+
+      :root {
+        --bg: #000;
+        --fg: #fff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 42%),
+          var(--bg);
+        color: var(--fg);
+      }
+
+      .logo-lockup {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .parallea-mark {
+        display: block;
+        width: clamp(5.5rem, 9vw, 7.5rem);
+        height: auto;
+        overflow: hidden;
+        shape-rendering: geometricPrecision;
+        text-rendering: geometricPrecision;
+      }
+
+      .parallea-mark__bar {
+        fill: var(--fg);
+        fill-rule: evenodd;
+        clip-rule: evenodd;
+      }
+
+      .logo-label {
+        margin: 0;
+        font-family: "Array", sans-serif;
+        font-size: clamp(1rem, 1.8vw, 1.4rem);
+        letter-spacing: 0.22em;
+        line-height: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo-lockup">
+      <svg
+        class="parallea-mark"
+        viewBox="0 0 282.004 376.886"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Parallea logo mark"
+        role="img"
+      >
+        <path
+          class="parallea-mark__bar parallea-mark__bar--left"
+          d="M56 376.886H0L134.004 0H190.004L56 376.886ZM146.654 9.422L19.35 367.464H43.35L170.654 9.422H146.654Z"
+        />
+        <path
+          class="parallea-mark__bar parallea-mark__bar--right"
+          d="M148 376.886H92L226.004 0H282.004L148 376.886ZM238.654 9.422L111.35 367.464H135.35L262.654 9.422H238.654Z"
+        />
+      </svg>
+      <p class="logo-label">PARALLEA</p>
+    </div>
+  </body>
+</html>

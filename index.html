@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parallea</title>
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=array@400,500,700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="is-loading">
+
+    <!-- LOADER -->
+    <div class="loader">
+      <svg viewBox="-425 -425 1850 1850" xmlns="http://www.w3.org/2000/svg">
+        <path id="loader-orbit-1" d="M 500,-275 A 775,775 0 0,1 500,1275 A 775,775 0 0,1 500,-275 A 775,775 0 0,1 500,1275 A 775,775 0 0,1 500,-275 A 775,775 0 0,1 500,1275 A 775,775 0 0,1 499.99,-275" />
+        <path id="loader-orbit-2" d="M 500,-200 A 700,700 0 0,1 500,1200 A 700,700 0 0,1 500,-200 A 700,700 0 0,1 500,1200 A 700,700 0 0,1 500,-200 A 700,700 0 0,1 500,1200 A 700,700 0 0,1 499.99,-200" />
+        <path id="loader-orbit-3" d="M 500,-125 A 625,625 0 0,1 500,1125 A 625,625 0 0,1 500,-125 A 625,625 0 0,1 500,1125 A 625,625 0 0,1 500,-125 A 625,625 0 0,1 500,1125 A 625,625 0 0,1 499.99,-125" />
+        <path id="loader-orbit-4" d="M 500,-50 A 550,550 0 0,1 500,1050 A 550,550 0 0,1 500,-50 A 550,550 0 0,1 500,1050 A 550,550 0 0,1 500,-50 A 550,550 0 0,1 500,1050 A 550,550 0 0,1 499.99,-50" />
+        <path id="loader-orbit-5" d="M 500,25 A 475,475 0 0,1 500,975 A 475,475 0 0,1 500,25 A 475,475 0 0,1 500,975 A 475,475 0 0,1 500,25 A 475,475 0 0,1 500,975 A 475,475 0 0,1 499.99,25" />
+        <path id="loader-orbit-6" d="M 500,100 A 400,400 0 0,1 500,900 A 400,400 0 0,1 500,900 A 400,400 0 0,1 500,100 A 400,400 0 0,1 500,900 A 400,400 0 0,1 499.99,100" />
+        <path id="loader-orbit-7" d="M 500,175 A 325,325 0 0,1 500,825 A 325,325 0 0,1 500,175 A 325,325 0 0,1 500,825 A 325,325 0 0,1 500,175 A 325,325 0 0,1 500,825 A 325,325 0 0,1 499.99,175" />
+        <path id="loader-orbit-8" d="M 500,250 A 250,250 0 0,1 500,750 A 250,250 0 0,1 500,250 A 250,250 0 0,1 500,750 A 250,250 0 0,1 500,250 A 250,250 0 0,1 500,750 A 250,250 0 0,1 499.99,250" />
+        <text class="orbit-text"><textPath href="#loader-orbit-1" startOffset="30%" textLength="300">Identity</textPath></text>
+        <text class="orbit-text"><textPath href="#loader-orbit-2" startOffset="31%" textLength="280">Memory</textPath></text>
+        <text class="orbit-text"><textPath href="#loader-orbit-3" startOffset="33%" textLength="240">Voice</textPath></text>
+        <text class="orbit-text"><textPath href="#loader-orbit-4" startOffset="32%" textLength="260">Presence</textPath></text>
+        <text class="orbit-text"><textPath href="#loader-orbit-5" startOffset="30%" textLength="290">Continuity</textPath></text>
+        <text class="orbit-text"><textPath href="#loader-orbit-6" startOffset="31%" textLength="200">Consciousness</textPath></text>
+        <text class="orbit-text"><textPath href="#loader-orbit-7" startOffset="33%" textLength="210">Extension</textPath></text>
+        <text class="orbit-text"><textPath href="#loader-orbit-8" startOffset="32%" textLength="190">Humanity</textPath></text>
+      </svg>
+      <div class="counter">
+        <p>0</p>
+      </div>
+    </div>
+
+    <!-- FRAME SEQUENCE -->
+    <section class="frame-sequence">
+      <canvas class="frame-canvas"></canvas>
+      <div class="gradient-overlay"></div>
+      <div class="hero-overlay">
+        <div class="hero-top-bar">
+          <div class="hero-logo">
+            <img
+              class="hero-logo-image"
+              src="/Logo_dark.svg"
+              alt="Parallea"
+            />
+          </div>
+          <div class="hero-actions">
+            <!-- Add your early access URL to the empty href below when ready. -->
+            <a
+              class="hero-btn hero-btn--primary hero-btn--magnetic js-magnetic hero-split"
+              href=""
+              data-early-access-trigger
+            >Join Waitlist</a>
+            <!-- Add your contact URL to the empty href below when ready. -->
+            <a
+              class="hero-btn hero-btn--magnetic js-magnetic hero-split"
+              href="mailto:ayush@paralleatech.com"
+            >Contact</a>
+          </div>
+        </div>
+        <p class="hero-tagline hero-split">Evolving towards a humane future.</p>
+      </div>
+    </section>
+
+    <!-- TEXT REVEAL -->
+    <section class="anime-text-container">
+      <div class="copy-container">
+        <div class="anime-text">
+          <p>
+            Human expertise isn’t just knowledge. It’s context, judgement, and decision-making over time. But today, it remains locked to a single point of execution, you.
+          </p>
+          <p>We are building the infrastructure to turn that intelligence into a system.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CYLINDER CAROUSEL / TUNNEL (third effect) -->
+    <section class="cylinder-section" aria-label="Panoramic scroll">
+      <canvas class="cylinder-canvas"></canvas>
+      <div class="cylinder-overlay">
+        <div class="cylinder-perspective cylinder-perspective--top">
+          <h2 class="cylinder-perspective__title">It begins with you</h2>
+          <p class="cylinder-perspective__desc">Not a generic model, but an individual perspective</p>
+        </div>
+        <div class="cylinder-perspective cylinder-perspective--center">
+          <h2 class="cylinder-perspective__title">Infinite perspective</h2>
+          <p class="cylinder-perspective__desc">Explore new dimensions</p>
+        </div>
+        <div class="cylinder-perspective cylinder-perspective--center-2">
+          <h2 class="cylinder-perspective__title">It evolves in conversation
+          </h2>
+          <p class="cylinder-perspective__desc">Questions, interruptions, and flow shape understanding.</p>
+        </div>
+        <div class="cylinder-perspective cylinder-perspective--bottom">
+          <h2 class="cylinder-perspective__title">Aligned with you</h2>
+          <p class="cylinder-perspective__desc cylinder-perspective__desc--solo">Consistent. Contextual. Present.</p>
+        </div>
+      </div>
+      <div class="cylinder-scroll-mount">
+        <div class="cylinder-scroll-spacer"></div>
+      </div>
+    </section>
+
+    <!-- Scroll runway between tunnel (3rd) and narrative + marquee (4th) -->
+    <div
+      class="effect-gap effect-gap--after-tunnel"
+      aria-hidden="true"
+    ></div>
+
+    <!-- SCROLL TEXT + MARQUEE -->
+    <section class="scroll-text-sequence" aria-label="Narrative scroll">
+      <div class="scroll-text-stage">
+        <div class="about-copy">
+          <div class="copy-block">
+            <p>
+              Traditional automation reduces tasks.
+              We focus on replicating reasoning.
+              The goal is not efficiency alone,
+              but fidelity to human decision-making.
+            </p>
+          </div>
+          <div class="copy-block">
+            <p>
+              We treat communication as data.
+              Tone, structure, and context define it.
+              Training goes beyond answers
+              to how they are delivered.
+            </p>
+          </div>
+          <div class="copy-block">
+            <p>
+              Learning is treated as interaction.
+              Questions shape understanding over time.
+              Students can ask, interrupt, and clarify
+              within the flow of explanation.
+            </p>
+          </div>
+        </div>
+
+        <div class="center-copy">
+          <div class="copy-block copy-block-centered">
+            <p>
+              We see AI as a force multiplier.
+              Not a replacement for human ability.
+              Our goal is to ensure intelligence scales
+              without removing the human behind it.
+            </p>
+          </div>
+        </div>
+
+        <div class="scroll-text-marquee">
+          <div class="marquee-track">
+            <div class="marquee-item"><img src="/scatter_1.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_2.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_3.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_4.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_5.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_6.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_7.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_8.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_9.jpg" alt="" loading="lazy" decoding="async" /></div>
+            <div class="marquee-item"><img src="/scatter_10.jpg" alt="" loading="lazy" decoding="async" /></div>
+          </div>
+        </div>
+
+        <div class="scroll-indicator" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- INTRODUCING SCRAMBLE -->
+    <section class="intro-scramble-sequence" aria-label="Introducing reveal">
+      <div class="intro-scramble-stage">
+        <div class="intro-portal-images" aria-hidden="true"></div>
+        <div class="intro-scramble-content">
+          <p class="intro-scramble-text" data-text="Introducing...">
+            Introducing...
+          </p>
+
+          <div class="intro-logo-lockup">
+            <svg
+              class="intro-logo-mark parallea-mark"
+              viewBox="0 0 282.004 376.886"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                class="parallea-mark__bar parallea-mark__bar--left"
+                d="M56 376.886H0L134.004 0H190.004L56 376.886ZM146.654 9.422L19.35 367.464H43.35L170.654 9.422H146.654Z"
+              />
+              <path
+                class="parallea-mark__bar parallea-mark__bar--right"
+                d="M148 376.886H92L226.004 0H282.004L148 376.886ZM238.654 9.422L111.35 367.464H135.35L262.654 9.422H238.654Z"
+              />
+            </svg>
+            <p class="intro-logo-label">PARALLEA</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="svg-trail-sequence" aria-label="Information design trail">
+      <div class="svg-trail-container">
+        <div class="svg-trail-ribbon" aria-hidden="true">
+          <svg
+            viewBox="0 0 1250 3800"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient
+                id="trail-gradient-core"
+                x1="625"
+                y1="40"
+                x2="625"
+                y2="3760"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop offset="0%" stop-color="#000000" />
+                <stop offset="10%" stop-color="#101010" />
+                <stop offset="24%" stop-color="#4f4f4f" />
+                <stop offset="38%" stop-color="#8f8f8f" />
+                <stop offset="50%" stop-color="#f2f2f2" />
+                <stop offset="62%" stop-color="#8f8f8f" />
+                <stop offset="76%" stop-color="#4f4f4f" />
+                <stop offset="90%" stop-color="#101010" />
+                <stop offset="100%" stop-color="#000000" />
+              </linearGradient>
+            </defs>
+
+            <path
+              class="svg-trail-path svg-trail-path--base"
+              d="M 625 40 C 785 165 945 320 980 560 C 1015 805 905 1060 735 1235 C 555 1415 310 1525 270 1785 C 230 2045 355 2290 545 2465 C 735 2640 980 2760 1010 3040 C 1040 3320 865 3535 625 3760"
+            />
+            <path
+              class="svg-trail-path svg-trail-path--core"
+              d="M 625 40 C 785 165 945 320 980 560 C 1015 805 905 1060 735 1235 C 555 1415 310 1525 270 1785 C 230 2045 355 2290 545 2465 C 735 2640 980 2760 1010 3040 C 1040 3320 865 3535 625 3760"
+            />
+          </svg>
+        </div>
+
+        <article class="trail-feature trail-feature--text-left">
+          <div class="trail-card trail-glass">
+            <h2>Start with your knowledge.</h2>
+            <p>
+              Upload recorded sessions, teaching material, or conversations.
+              Parallea analyzes patterns across explanations, responses, and
+              context handling, building a system that reflects how you think,
+              not just what you know.
+            </p>
+          </div>
+          <div class="trail-feature-media">
+            <img src="/1.png" alt="Abstract metallic form" loading="lazy" decoding="async" />
+          </div>
+        </article>
+
+        <article class="trail-feature trail-feature--text-right">
+          <div class="trail-feature-media">
+            <img src="/2.png" alt="Reflective liquid-metal structure" loading="lazy" decoding="async" />
+          </div>
+          <div class="trail-card trail-glass">
+            <h2>Refine how it responds.</h2>
+            <p>
+              Once initialized, the system is iteratively trained on context,
+              edge cases, and real interactions. You can guide responses,
+              correct outputs, and reinforce preferred ways of explaining,
+              deciding, and communicating.
+            </p>
+          </div>
+        </article>
+
+        <article class="trail-feature trail-feature--text-left">
+          <div class="trail-card trail-glass">
+            <h2>Deploy across interactions.</h2>
+            <p>
+              Your digital twin can operate across calls, meetings, and
+              learning environments. It responds in real time, handling
+              questions, participating in discussions, and supporting workflows
+              without requiring your direct presence.
+            </p>
+          </div>
+          <div class="trail-feature-media">
+            <img src="/3.png" alt="Sculptural chrome assembly" loading="lazy" decoding="async" />
+          </div>
+        </article>
+
+        <article class="trail-feature trail-feature--text-right">
+          <div class="trail-feature-media">
+            <img src="/4.png" alt="Futuristic polished artifact" loading="lazy" decoding="async" />
+          </div>
+          <div class="trail-card trail-glass">
+            <h2>Scale without losing fidelity.</h2>
+            <p>
+              As usage grows, the system maintains consistency across every
+              interaction. Each response follows the same underlying patterns of
+              reasoning and communication, regardless of scale.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="shader-card-sequence" aria-label="Parallea contact reveal">
+      <div class="shader-card-stage">
+        <div class="shader-card-cards">
+          <div class="shader-card-container">
+            <article class="shader-contact-card" id="shader-contact-card-1">
+              <div class="shader-contact-card__inner">
+                <div class="shader-contact-card__face shader-contact-card__face--front"></div>
+
+                <div class="shader-contact-card__face shader-contact-card__face--back">
+                  <div class="shader-contact-card__portrait" data-reveal>
+                    <img src="/profile1.jpg" alt="Ayush Kumar Bhardwaj" loading="lazy" decoding="async" />
+                  </div>
+                  <div class="shader-contact-card__name" data-reveal>
+                    Ayush Kumar Bhardwaj
+                  </div>
+                  <div class="shader-contact-card__role" data-reveal>Founder</div>
+                  <div class="shader-contact-card__divider" data-reveal></div>
+                  <div class="shader-contact-card__actions" data-reveal>
+                    <a
+                      href="https://www.linkedin.com/in/ayushkumarbhardwaj/"
+                      class="shader-contact-card__link"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M20.447 20.452H17.21v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.987V9h3.102v1.561h.042c.431-.818 1.484-1.681 3.054-1.681 3.268 0 3.868 2.149 3.868 4.944l-.006 6.628zM5.337 7.433a1.8 1.8 0 1 1 0-3.601 1.8 1.8 0 0 1 0 3.601zm1.554 13.019H3.783V9h3.108v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                        />
+                      </svg>
+                      LinkedIn
+                    </a>
+                    <a
+                      href="mailto:ayush@paralleatech.com"
+                      class="shader-contact-card__link"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"
+                        />
+                      </svg>
+                      Gmail
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shader-contact-card" id="shader-contact-card-2">
+              <div class="shader-contact-card__inner">
+                <div class="shader-contact-card__face shader-contact-card__face--front"></div>
+
+                <div class="shader-contact-card__face shader-contact-card__face--back">
+                  <div class="shader-contact-card__portrait" data-reveal>
+                    <img src="/profile2.jpg" alt="Manish Kumar" loading="lazy" decoding="async" />
+                  </div>
+                  <div class="shader-contact-card__name" data-reveal>
+                    Manish Kumar
+                  </div>
+                  <div class="shader-contact-card__role" data-reveal>
+                    Founding Designer
+                  </div>
+                  <div class="shader-contact-card__divider" data-reveal></div>
+                  <div class="shader-contact-card__actions" data-reveal>
+                    <a
+                      href="https://www.linkedin.com/in/manishkr369"
+                      class="shader-contact-card__link"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M20.447 20.452H17.21v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.987V9h3.102v1.561h.042c.431-.818 1.484-1.681 3.054-1.681 3.268 0 3.868 2.149 3.868 4.944l-.006 6.628zM5.337 7.433a1.8 1.8 0 1 1 0-3.601 1.8 1.8 0 0 1 0 3.601zm1.554 13.019H3.783V9h3.108v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                        />
+                      </svg>
+                      LinkedIn
+                    </a>
+                    <a
+                      href="mailto:manish@paralleatech.com"
+                      class="shader-contact-card__link"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"
+                        />
+                      </svg>
+                      Gmail
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="shader-card-gl" aria-hidden="true"></div>
+        <div class="shader-card-proxy" aria-hidden="true">
+          <div class="shader-card-proxy__image"></div>
+        </div>
+        <div class="shader-card-labels" aria-hidden="true"></div>
+
+      </div>
+    </section>
+
+    <section class="glass-finale" aria-label="Glass ball finale">
+      <div class="glass-finale-gl" aria-hidden="true"></div>
+      <div class="glass-finale-overlay">
+        <div class="glass-finale-center">
+          <!-- Add your early access URL to the empty href below when ready. -->
+          <a
+            class="hero-btn hero-btn--primary glass-finale-cta js-magnetic"
+            href=""
+            data-early-access-trigger
+          >Join Waitlist</a>
+        </div>
+
+        <div class="glass-finale-meta glass-finale-meta--left">
+          <!-- Add your LinkedIn URL to the empty href below when ready. -->
+          <a
+            class="glass-finale-meta-link js-magnetic"
+            href="https://linkedin.com/company/parallea"
+            target="_blank"
+            rel="noreferrer"
+          >linkedin</a>
+          <!-- Add your X URL to the empty href below when ready. -->
+          <a
+            class="glass-finale-meta-link js-magnetic"
+            href="https://x.com/Paralleatech"
+            target="_blank"
+            rel="noreferrer"
+          >x</a>
+        </div>
+
+        <div class="glass-finale-meta glass-finale-meta--right">
+          <p class="glass-finale-credit">
+            designed and developed by
+            <!-- Add your Manish URL to the empty href below when ready. -->
+            <a
+              class="glass-finale-meta-link js-magnetic"
+              href="https://www.linkedin.com/in/manishkr369"
+              target="_blank"
+              rel="noreferrer"
+            >manish</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="early-access-sheet" aria-hidden="true">
+      <div class="early-access-sheet__backdrop" data-early-access-close></div>
+      <div
+        class="early-access-sheet__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="early-access-title"
+      >
+        <p class="early-access-sheet__title" id="early-access-title">
+          Write your email
+        </p>
+        <form class="early-access-sheet__form" novalidate>
+          <div class="early-access-sheet__field">
+            <input
+              class="early-access-sheet__input"
+              id="early-access-email"
+              type="email"
+              name="email"
+              inputmode="email"
+              autocomplete="email"
+              required
+              maxlength="320"
+              placeholder="you@gmail.com"
+              aria-label="Your email"
+            />
+            <button
+              class="early-access-sheet__submit"
+              type="submit"
+              aria-label="Submit email"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6.5 12.5L10.25 16.25L17.5 8.75"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>
