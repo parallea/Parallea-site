@@ -410,7 +410,6 @@ const getFramePath = (index) =>
   `/frames/frame${(index + 1).toString().padStart(4, "0")}.jpg`;
 const FRAME_LOAD_CONCURRENCY = window.innerWidth < 768 ? 2 : 3;
 const FRAME_PREFETCH_RADIUS = window.innerWidth < 768 ? 3 : 4;
-const FRAME_CACHE_RADIUS = window.innerWidth < 768 ? 6 : 10;
 const CRITICAL_FRAME_INDICES = [0, 1, 2, 3, 4, 5];
 const WARM_FRAME_INDICES = Array.from(
   new Set(
@@ -437,70 +436,6 @@ let frameSequenceReady = false;
 let frameDrawScheduled = false;
 
 const isValidFrameIndex = (index) => index >= 0 && index < frameCount;
-const supportsImageBitmap =
-  typeof window !== "undefined" &&
-  typeof window.createImageBitmap === "function";
-
-const getFrameAssetSize = (asset) => {
-  if (!asset) return null;
-
-  if (
-    typeof asset.naturalWidth === "number" &&
-    typeof asset.naturalHeight === "number" &&
-    asset.naturalWidth > 0 &&
-    asset.naturalHeight > 0
-  ) {
-    return {
-      width: asset.naturalWidth,
-      height: asset.naturalHeight,
-    };
-  }
-
-  if (
-    typeof asset.width === "number" &&
-    typeof asset.height === "number" &&
-    asset.width > 0 &&
-    asset.height > 0
-  ) {
-    return {
-      width: asset.width,
-      height: asset.height,
-    };
-  }
-
-  return null;
-};
-
-const disposeFrameAsset = (index) => {
-  const asset = images[index];
-  if (!asset || frameLoading.has(index)) return;
-
-  if (typeof asset.close === "function") {
-    asset.close();
-  } else if (typeof asset.src === "string") {
-    asset.src = "";
-  }
-
-  images[index] = null;
-  frameAvailable[index] = false;
-  frameSettled[index] = false;
-  frameQueuePriority[index] = 0;
-};
-
-const pruneFrameCache = (center) => {
-  for (let index = 0; index < frameCount; index++) {
-    if (
-      !frameSettled[index] ||
-      !frameAvailable[index] ||
-      CRITICAL_FRAME_SET.has(index) ||
-      Math.abs(index - center) <= FRAME_CACHE_RADIUS
-    ) {
-      continue;
-    }
-
-    disposeFrameAsset(index);
-  }
-};
 
 const getBestLoadedFrameIndex = (targetIndex) => {
   if (frameAvailable[targetIndex]) return targetIndex;
@@ -524,10 +459,9 @@ const drawFrame = () => {
   const frameIndex = getBestLoadedFrameIndex(frameState.current);
   if (frameIndex === -1) return;
 
-  const asset = images[frameIndex];
-  const assetSize = getFrameAssetSize(asset);
-  if (!asset || !assetSize) return;
-  const imageAspect = assetSize.width / assetSize.height;
+  const img = images[frameIndex];
+  if (!img || !img.complete || img.naturalWidth === 0) return;
+  const imageAspect = img.naturalWidth / img.naturalHeight;
   const canvasAspect = canvasWidth / canvasHeight;
   let drawWidth, drawHeight, drawX, drawY;
   if (imageAspect > canvasAspect) {
@@ -541,7 +475,7 @@ const drawFrame = () => {
     drawX = 0;
     drawY = (canvasHeight - drawHeight) / 2;
   }
-  context.drawImage(asset, drawX, drawY, drawWidth, drawHeight);
+  context.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 };
 
 const scheduleFrameDraw = () => {
@@ -599,40 +533,6 @@ const finalizeFrameLoad = (index, wasSuccessful) => {
   pumpFrameQueue();
 };
 
-const loadFrameAsset = async (index) => {
-  const framePath = getFramePath(index);
-
-  if (supportsImageBitmap) {
-    const response = await fetch(framePath, { cache: "force-cache" });
-    if (!response.ok) {
-      throw new Error(`Frame request failed for ${framePath}`);
-    }
-
-    const blob = await response.blob();
-    return createImageBitmap(blob);
-  }
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.decoding = "async";
-
-    img.onload = async () => {
-      if (typeof img.decode === "function") {
-        try {
-          await img.decode();
-        } catch (_error) {
-          // Ignore decode errors and use the loaded image.
-        }
-      }
-
-      resolve(img);
-    };
-
-    img.onerror = reject;
-    img.src = framePath;
-  });
-};
-
 const getNextQueuedFrame = () => {
   while (priorityFrameQueue.length) {
     const index = priorityFrameQueue.shift();
@@ -670,15 +570,13 @@ const pumpFrameQueue = () => {
     frameLoading.add(index);
     activeFrameLoads++;
 
-    loadFrameAsset(index)
-      .then((asset) => {
-        images[index] = asset;
-        finalizeFrameLoad(index, true);
-      })
-      .catch(() => {
-        images[index] = null;
-        finalizeFrameLoad(index, false);
-      });
+    const img = new Image();
+    img.decoding = "async";
+    images[index] = img;
+
+    img.onload = () => finalizeFrameLoad(index, true);
+    img.onerror = () => finalizeFrameLoad(index, false);
+    img.src = getFramePath(index);
   }
 };
 
@@ -1519,7 +1417,6 @@ const initScrollTrigger = async () => {
         if (targetFrame !== frameState.current) {
           frameState.current = targetFrame;
           requestFrameWindow(targetFrame);
-          pruneFrameCache(targetFrame);
           scheduleFrameDraw();
         }
         updateGradient(progress);
