@@ -137,7 +137,9 @@ const registerLazyEffects = () => {
 // ─── CANVAS / FRAME SEQUENCE ──────────────────────────────────────────────────
 const section = document.querySelector(".frame-sequence");
 const canvas = document.querySelector(".frame-canvas");
-const context = canvas.getContext("2d");
+const context =
+  canvas.getContext("2d", { alpha: false, desynchronized: true }) ||
+  canvas.getContext("2d");
 const gradientOverlay = document.querySelector(".gradient-overlay");
 const heroLogo = document.querySelector(".hero-logo");
 const magneticElements = gsap.utils.toArray(".js-magnetic");
@@ -393,10 +395,7 @@ initMagneticInteractions();
 initEarlyAccessSheet();
 
 const setCanvasSize = () => {
-  const pixelRatio =
-    window.innerWidth < 768
-      ? 1
-      : Math.min(window.devicePixelRatio || 1, 1.5);
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 1);
   canvas.width = window.innerWidth * pixelRatio;
   canvas.height = window.innerHeight * pixelRatio;
   canvas.style.width = window.innerWidth + "px";
@@ -409,8 +408,9 @@ setCanvasSize();
 const frameCount = 145;
 const getFramePath = (index) =>
   `/frames/frame${(index + 1).toString().padStart(4, "0")}.jpg`;
-const FRAME_LOAD_CONCURRENCY = 4;
-const FRAME_PREFETCH_RADIUS = 5;
+const FRAME_LOAD_CONCURRENCY = window.innerWidth < 768 ? 2 : 3;
+const FRAME_PREFETCH_RADIUS = window.innerWidth < 768 ? 3 : 4;
+const FRAME_CACHE_RADIUS = window.innerWidth < 768 ? 6 : 10;
 const CRITICAL_FRAME_INDICES = [0, 1, 2, 3, 4, 5];
 const WARM_FRAME_INDICES = Array.from(
   new Set(
@@ -434,8 +434,73 @@ let activeFrameLoads = 0;
 let criticalFramesSettled = 0;
 let frameLoadingStarted = false;
 let frameSequenceReady = false;
+let frameDrawScheduled = false;
 
 const isValidFrameIndex = (index) => index >= 0 && index < frameCount;
+const supportsImageBitmap =
+  typeof window !== "undefined" &&
+  typeof window.createImageBitmap === "function";
+
+const getFrameAssetSize = (asset) => {
+  if (!asset) return null;
+
+  if (
+    typeof asset.naturalWidth === "number" &&
+    typeof asset.naturalHeight === "number" &&
+    asset.naturalWidth > 0 &&
+    asset.naturalHeight > 0
+  ) {
+    return {
+      width: asset.naturalWidth,
+      height: asset.naturalHeight,
+    };
+  }
+
+  if (
+    typeof asset.width === "number" &&
+    typeof asset.height === "number" &&
+    asset.width > 0 &&
+    asset.height > 0
+  ) {
+    return {
+      width: asset.width,
+      height: asset.height,
+    };
+  }
+
+  return null;
+};
+
+const disposeFrameAsset = (index) => {
+  const asset = images[index];
+  if (!asset || frameLoading.has(index)) return;
+
+  if (typeof asset.close === "function") {
+    asset.close();
+  } else if (typeof asset.src === "string") {
+    asset.src = "";
+  }
+
+  images[index] = null;
+  frameAvailable[index] = false;
+  frameSettled[index] = false;
+  frameQueuePriority[index] = 0;
+};
+
+const pruneFrameCache = (center) => {
+  for (let index = 0; index < frameCount; index++) {
+    if (
+      !frameSettled[index] ||
+      !frameAvailable[index] ||
+      CRITICAL_FRAME_SET.has(index) ||
+      Math.abs(index - center) <= FRAME_CACHE_RADIUS
+    ) {
+      continue;
+    }
+
+    disposeFrameAsset(index);
+  }
+};
 
 const getBestLoadedFrameIndex = (targetIndex) => {
   if (frameAvailable[targetIndex]) return targetIndex;
@@ -452,15 +517,17 @@ const getBestLoadedFrameIndex = (targetIndex) => {
 };
 
 const drawFrame = () => {
+  frameDrawScheduled = false;
   const canvasWidth = window.innerWidth;
   const canvasHeight = window.innerHeight;
   context.clearRect(0, 0, canvasWidth, canvasHeight);
   const frameIndex = getBestLoadedFrameIndex(frameState.current);
   if (frameIndex === -1) return;
 
-  const img = images[frameIndex];
-  if (!img || !img.complete || img.naturalWidth === 0) return;
-  const imageAspect = img.naturalWidth / img.naturalHeight;
+  const asset = images[frameIndex];
+  const assetSize = getFrameAssetSize(asset);
+  if (!asset || !assetSize) return;
+  const imageAspect = assetSize.width / assetSize.height;
   const canvasAspect = canvasWidth / canvasHeight;
   let drawWidth, drawHeight, drawX, drawY;
   if (imageAspect > canvasAspect) {
@@ -474,7 +541,13 @@ const drawFrame = () => {
     drawX = 0;
     drawY = (canvasHeight - drawHeight) / 2;
   }
-  context.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+  context.drawImage(asset, drawX, drawY, drawWidth, drawHeight);
+};
+
+const scheduleFrameDraw = () => {
+  if (frameDrawScheduled) return;
+  frameDrawScheduled = true;
+  requestAnimationFrame(drawFrame);
 };
 
 const requestFrameWindow = (center, radius = FRAME_PREFETCH_RADIUS) => {
@@ -492,7 +565,7 @@ const onCriticalFramesReady = () => {
   if (frameSequenceReady) return;
   frameSequenceReady = true;
 
-  drawFrame();
+  scheduleFrameDraw();
   initScrollTrigger().catch((error) => {
     frameSequenceReady = false;
     console.error("Failed to initialize scroll sequences:", error);
@@ -520,10 +593,44 @@ const finalizeFrameLoad = (index, wasSuccessful) => {
     index === frameState.current ||
     Math.abs(index - frameState.current) <= FRAME_PREFETCH_RADIUS
   ) {
-    drawFrame();
+    scheduleFrameDraw();
   }
 
   pumpFrameQueue();
+};
+
+const loadFrameAsset = async (index) => {
+  const framePath = getFramePath(index);
+
+  if (supportsImageBitmap) {
+    const response = await fetch(framePath, { cache: "force-cache" });
+    if (!response.ok) {
+      throw new Error(`Frame request failed for ${framePath}`);
+    }
+
+    const blob = await response.blob();
+    return createImageBitmap(blob);
+  }
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.decoding = "async";
+
+    img.onload = async () => {
+      if (typeof img.decode === "function") {
+        try {
+          await img.decode();
+        } catch (_error) {
+          // Ignore decode errors and use the loaded image.
+        }
+      }
+
+      resolve(img);
+    };
+
+    img.onerror = reject;
+    img.src = framePath;
+  });
 };
 
 const getNextQueuedFrame = () => {
@@ -560,14 +667,18 @@ const pumpFrameQueue = () => {
       continue;
     }
 
-    const img = new Image();
-    images[index] = img;
     frameLoading.add(index);
     activeFrameLoads++;
 
-    img.onload = () => finalizeFrameLoad(index, true);
-    img.onerror = () => finalizeFrameLoad(index, false);
-    img.src = getFramePath(index);
+    loadFrameAsset(index)
+      .then((asset) => {
+        images[index] = asset;
+        finalizeFrameLoad(index, true);
+      })
+      .catch(() => {
+        images[index] = null;
+        finalizeFrameLoad(index, false);
+      });
   }
 };
 
@@ -603,7 +714,6 @@ const startFrameLoading = () => {
   frameLoadingStarted = true;
 
   CRITICAL_FRAME_INDICES.forEach((index) => queueFrameLoad(index, true));
-  WARM_FRAME_INDICES.forEach((index) => queueFrameLoad(index, true));
 
   requestFrameWindow(0);
 };
@@ -1409,7 +1519,8 @@ const initScrollTrigger = async () => {
         if (targetFrame !== frameState.current) {
           frameState.current = targetFrame;
           requestFrameWindow(targetFrame);
-          drawFrame();
+          pruneFrameCache(targetFrame);
+          scheduleFrameDraw();
         }
         updateGradient(progress);
       },
@@ -1659,6 +1770,6 @@ window.addEventListener("resize", () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
     setCanvasSize();
-    drawFrame();
+    scheduleFrameDraw();
   }, 200);
 });
