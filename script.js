@@ -408,8 +408,8 @@ setCanvasSize();
 const frameCount = 145;
 const getFramePath = (index) =>
   `/frames/frame${(index + 1).toString().padStart(4, "0")}.jpg`;
-const FRAME_LOAD_CONCURRENCY = window.innerWidth < 768 ? 2 : 3;
-const FRAME_PREFETCH_RADIUS = window.innerWidth < 768 ? 3 : 4;
+const FRAME_LOAD_CONCURRENCY = 4;
+const FRAME_PREFETCH_RADIUS = 5;
 const CRITICAL_FRAME_INDICES = [0, 1, 2, 3, 4, 5];
 const WARM_FRAME_INDICES = Array.from(
   new Set(
@@ -612,6 +612,7 @@ const startFrameLoading = () => {
   frameLoadingStarted = true;
 
   CRITICAL_FRAME_INDICES.forEach((index) => queueFrameLoad(index, true));
+  WARM_FRAME_INDICES.forEach((index) => queueFrameLoad(index, true));
 
   requestFrameWindow(0);
 };
