@@ -3,6 +3,7 @@ import { SplitText } from "gsap/SplitText";
 import { CustomEase } from "gsap/all";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
+import lottie from "lottie-web";
 
 gsap.registerPlugin(SplitText, CustomEase, ScrollTrigger);
 CustomEase.create("hop", "0.9, 0, 0.1, 1");
@@ -137,9 +138,37 @@ const registerLazyEffects = () => {
 // ─── CANVAS / FRAME SEQUENCE ──────────────────────────────────────────────────
 const section = document.querySelector(".frame-sequence");
 const canvas = document.querySelector(".frame-canvas");
-const context =
-  canvas.getContext("2d", { alpha: false, desynchronized: true }) ||
-  canvas.getContext("2d");
+const context = canvas
+  ? canvas.getContext("2d", { alpha: false, desynchronized: true }) ||
+    canvas.getContext("2d")
+  : null;
+const heroLottieContainer = document.querySelector(".hero-lottie");
+const heroQueryParams = new URLSearchParams(window.location.search);
+const getHeroRendererSetting = () => {
+  const queryRenderer = heroQueryParams.get("heroRenderer");
+  if (queryRenderer === "frames" || queryRenderer === "lottie") {
+    return queryRenderer;
+  }
+
+  return section?.dataset.heroRenderer === "lottie" ? "lottie" : "frames";
+};
+const requestedHeroRenderer = getHeroRendererSetting();
+const heroLottiePath =
+  heroQueryParams.get("heroLottiePath") ||
+  section?.dataset.heroLottiePath ||
+  "/h.mov.lottie.json";
+const heroLottieRenderer =
+  heroQueryParams.get("heroLottieRenderer") ||
+  section?.dataset.heroLottieRenderer ||
+  "svg";
+const canUseFrameHero = Boolean(canvas && context);
+let activeHeroRenderer =
+  requestedHeroRenderer === "lottie" && heroLottieContainer
+    ? "lottie"
+    : "frames";
+let heroMediaElement =
+  activeHeroRenderer === "lottie" ? heroLottieContainer : canvas;
+let heroLottieAnimation = null;
 const gradientOverlay = document.querySelector(".gradient-overlay");
 const heroLogo = document.querySelector(".hero-logo");
 const magneticElements = gsap.utils.toArray(".js-magnetic");
@@ -160,6 +189,36 @@ const heroSplitInstances = heroTextSplitElements.map(
 const heroChars = heroSplitInstances.flatMap((split) => split.chars);
 const heroRevealTargets = [...heroMagneticButtons, ...heroChars];
 let heroRevealStarted = false;
+
+const syncHeroRendererState = () => {
+  section?.classList.toggle(
+    "frame-sequence--lottie",
+    activeHeroRenderer === "lottie"
+  );
+
+  if (canvas) {
+    canvas.hidden = activeHeroRenderer !== "frames";
+  }
+
+  if (heroLottieContainer) {
+    heroLottieContainer.hidden = activeHeroRenderer !== "lottie";
+  }
+
+  heroMediaElement =
+    activeHeroRenderer === "lottie" ? heroLottieContainer : canvas;
+};
+
+const fallbackToFrameHero = () => {
+  if (!canUseFrameHero || activeHeroRenderer === "frames") return false;
+
+  heroLottieAnimation?.destroy();
+  heroLottieAnimation = null;
+  activeHeroRenderer = "frames";
+  syncHeroRendererState();
+  return true;
+};
+
+syncHeroRendererState();
 
 gsap.set(heroRevealTargets, { yPercent: 120, opacity: 0 });
 if (heroLogo) {
@@ -395,6 +454,8 @@ initMagneticInteractions();
 initEarlyAccessSheet();
 
 const setCanvasSize = () => {
+  if (!canvas || !context) return;
+
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 1);
   canvas.width = window.innerWidth * pixelRatio;
   canvas.height = window.innerHeight * pixelRatio;
@@ -428,12 +489,66 @@ const frameQueuePriority = new Array(frameCount).fill(0);
 const priorityFrameQueue = [];
 const normalFrameQueue = [];
 const frameState = { current: 0 };
+const heroLottieFrameState = { current: 0 };
 let scrollTriggerReady = false;
 let activeFrameLoads = 0;
 let criticalFramesSettled = 0;
 let frameLoadingStarted = false;
 let frameSequenceReady = false;
 let frameDrawScheduled = false;
+
+const initHeroLottie = () => {
+  if (activeHeroRenderer !== "lottie" || !heroLottieContainer) {
+    return Promise.resolve(null);
+  }
+
+  if (heroLottieAnimation) {
+    return Promise.resolve(heroLottieAnimation);
+  }
+
+  lottie.setQuality(prefersReducedMotion ? "low" : "medium");
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const animation = lottie.loadAnimation({
+      container: heroLottieContainer,
+      renderer: heroLottieRenderer,
+      loop: false,
+      autoplay: false,
+      path: heroLottiePath,
+      rendererSettings: {
+        preserveAspectRatio: "xMidYMid slice",
+      },
+    });
+
+    const cleanup = () => {
+      animation.removeEventListener("DOMLoaded", handleReady);
+      animation.removeEventListener("data_failed", handleError);
+    };
+
+    const handleReady = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      heroLottieAnimation = animation;
+      heroLottieFrameState.current = 0;
+      animation.goToAndStop(0, true);
+      resolve(animation);
+    };
+
+    const handleError = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      animation.destroy();
+      reject(new Error(`Failed to load hero Lottie from ${heroLottiePath}`));
+    };
+
+    animation.addEventListener("DOMLoaded", handleReady);
+    animation.addEventListener("data_failed", handleError);
+  });
+};
 
 const isValidFrameIndex = (index) => index >= 0 && index < frameCount;
 
@@ -453,6 +568,8 @@ const getBestLoadedFrameIndex = (targetIndex) => {
 
 const drawFrame = () => {
   frameDrawScheduled = false;
+  if (!context || activeHeroRenderer !== "frames") return;
+
   const canvasWidth = window.innerWidth;
   const canvasHeight = window.innerHeight;
   context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -479,6 +596,7 @@ const drawFrame = () => {
 };
 
 const scheduleFrameDraw = () => {
+  if (!canvas || !context) return;
   if (frameDrawScheduled) return;
   frameDrawScheduled = true;
   requestAnimationFrame(drawFrame);
@@ -608,6 +726,7 @@ function queueFrameLoad(index, priority = false) {
 }
 
 const startFrameLoading = () => {
+  if (!canUseFrameHero) return;
   if (frameLoadingStarted) return;
   frameLoadingStarted = true;
 
@@ -615,6 +734,23 @@ const startFrameLoading = () => {
   WARM_FRAME_INDICES.forEach((index) => queueFrameLoad(index, true));
 
   requestFrameWindow(0);
+};
+
+const startHeroMedia = () => {
+  if (activeHeroRenderer === "lottie") {
+    initHeroLottie()
+      .then(() => initScrollTrigger())
+      .catch((error) => {
+        console.error("Failed to initialize hero Lottie:", error);
+        if (fallbackToFrameHero()) {
+          setCanvasSize();
+          startFrameLoading();
+        }
+      });
+    return;
+  }
+
+  startFrameLoading();
 };
 
 const updateGradient = (progress) => {
@@ -1404,7 +1540,7 @@ const initScrollTrigger = async () => {
   scrollTriggerReady = true;
 
   try {
-    // Frame sequence
+    // Hero media
     ScrollTrigger.create({
       trigger: section,
       start: "top top",
@@ -1414,11 +1550,21 @@ const initScrollTrigger = async () => {
       scrub: 3,
       onUpdate: (self) => {
         const progress = self.progress;
-        const targetFrame = Math.round(progress * (frameCount - 1));
-        if (targetFrame !== frameState.current) {
-          frameState.current = targetFrame;
-          requestFrameWindow(targetFrame);
-          scheduleFrameDraw();
+        if (activeHeroRenderer === "lottie" && heroLottieAnimation) {
+          const targetFrame = Math.round(
+            progress * Math.max(heroLottieAnimation.totalFrames - 1, 0)
+          );
+          if (targetFrame !== heroLottieFrameState.current) {
+            heroLottieFrameState.current = targetFrame;
+            heroLottieAnimation.goToAndStop(targetFrame, true);
+          }
+        } else {
+          const targetFrame = Math.round(progress * (frameCount - 1));
+          if (targetFrame !== frameState.current) {
+            frameState.current = targetFrame;
+            requestFrameWindow(targetFrame);
+            scheduleFrameDraw();
+          }
         }
         updateGradient(progress);
       },
@@ -1553,7 +1699,7 @@ const initScrollTrigger = async () => {
     throw error;
   }
 };
-startFrameLoading();
+startHeroMedia();
 
 // ─── LOADER ───────────────────────────────────────────────────────────────────
 const loaderSvg = document.querySelector(".loader svg");
@@ -1653,11 +1799,13 @@ gsap.to(orbitTextsReversed, {
         registerLazyEffects();
       },
     });
-    gsap.to(canvas, {
-      opacity: 1,
-      duration: 1,
-      ease: "power2.inOut",
-    });
+    if (heroMediaElement) {
+      gsap.to(heroMediaElement, {
+        opacity: 1,
+        duration: 1,
+        ease: "power2.inOut",
+      });
+    }
     revealHeroOverlay();
   },
 });
@@ -1668,6 +1816,11 @@ window.addEventListener("resize", () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
     setCanvasSize();
+    if (activeHeroRenderer === "lottie") {
+      heroLottieAnimation?.resize();
+      return;
+    }
+
     scheduleFrameDraw();
   }, 200);
 });

@@ -45,8 +45,14 @@
     </div>
 
     <!-- FRAME SEQUENCE -->
-    <section class="frame-sequence">
+    <section
+      class="frame-sequence"
+      data-hero-renderer="lottie"
+      data-hero-lottie-path="/h.mov.lottie.json"
+      data-hero-lottie-renderer="canvas"
+    >
       <canvas class="frame-canvas"></canvas>
+      <div class="hero-lottie" aria-hidden="true" hidden></div>
       <div class="gradient-overlay"></div>
       <div class="hero-overlay">
         <div class="hero-top-bar">
