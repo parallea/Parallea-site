@@ -170,9 +170,8 @@ let heroMediaElement =
   activeHeroRenderer === "lottie" ? heroLottieContainer : canvas;
 let heroLottieAnimation = null;
 const gradientOverlay = document.querySelector(".gradient-overlay");
-const heroLogo = document.querySelector(".hero-logo");
+const heroTopBar = document.querySelector(".hero-top-bar");
 const magneticElements = gsap.utils.toArray(".js-magnetic");
-const heroMagneticButtons = gsap.utils.toArray(".hero-btn--magnetic");
 const heroTextSplitElements = gsap.utils.toArray(".hero-tagline.hero-split");
 const earlyAccessTriggers = gsap.utils.toArray("[data-early-access-trigger]");
 const earlyAccessSheet = document.querySelector(".early-access-sheet");
@@ -187,7 +186,6 @@ const heroSplitInstances = heroTextSplitElements.map(
   (element) => new SplitText(element, { type: "words,chars" })
 );
 const heroChars = heroSplitInstances.flatMap((split) => split.chars);
-const heroRevealTargets = [...heroMagneticButtons, ...heroChars];
 let heroRevealStarted = false;
 
 const syncHeroRendererState = () => {
@@ -220,23 +218,22 @@ const fallbackToFrameHero = () => {
 
 syncHeroRendererState();
 
-gsap.set(heroRevealTargets, { yPercent: 120, opacity: 0 });
-if (heroLogo) {
-  gsap.set(heroLogo, { yPercent: 120, opacity: 0 });
+if (heroTopBar) {
+  gsap.set(heroTopBar, { yPercent: -120 });
 }
+gsap.set(heroChars, { yPercent: 120, opacity: 0 });
 
 const revealHeroOverlay = () => {
   if (heroRevealStarted) return;
   heroRevealStarted = true;
-  if (heroLogo) {
-    gsap.to(heroLogo, {
+  if (heroTopBar) {
+    gsap.to(heroTopBar, {
       yPercent: 0,
-      opacity: 1,
       duration: 0.85,
       ease: "hop",
     });
   }
-  gsap.to(heroRevealTargets, {
+  gsap.to(heroChars, {
     yPercent: 0,
     opacity: 1,
     duration: 0.85,
@@ -1571,7 +1568,7 @@ const initScrollTrigger = async () => {
     });
 
     // Hero split-text disappears while scrolling down through the pinned scene
-    const heroHideTween = gsap.to(heroRevealTargets, {
+    const heroHideTween = gsap.to(heroChars, {
       yPercent: -120,
       opacity: 0,
       duration: 1,
@@ -1579,15 +1576,6 @@ const initScrollTrigger = async () => {
       stagger: { each: 0.009, from: "end" },
       paused: true,
     });
-    const heroLogoHideTween = heroLogo
-      ? gsap.to(heroLogo, {
-          yPercent: -120,
-          opacity: 0,
-          duration: 1,
-          ease: "hop",
-          paused: true,
-        })
-      : null;
 
     ScrollTrigger.create({
       trigger: section,
@@ -1596,7 +1584,6 @@ const initScrollTrigger = async () => {
       scrub: true,
       onUpdate: (self) => {
         heroHideTween.progress(self.progress);
-        heroLogoHideTween?.progress(self.progress);
       },
     });
 
